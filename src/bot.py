@@ -9,10 +9,11 @@ Created by sheepy0125, inspired by DankMemer
 #############
 # Import
 from tools import Logger
-from discord import Embed, Game
+from discord import Embed, Game, Message, User
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from json import load
+from typing import Union
 
 # Parse configuration
 try:
@@ -46,17 +47,57 @@ except Exception as error:
     exit(1)
 
 # Create bot
-pass
+client: commands.Bot = commands.Bot(
+    command_prefix="\\", case_insensitive=True
+)  # Arbitrary unused prefix
+client.remove_command("help")
+slash: SlashCommand = SlashCommand(client, sync_commands=True)
+
+deleted_messages: dict = {}
+# Stores a single deleted message for every channel ID
+# Example: {"123456": "Deleted message in #general", "654321": "Deleted message in #off-topic"}
 
 #################
 ### Functions ###
 #################
 pass
 
+
+##############
+### Events ###
+##############
+@client.event
+async def on_ready() -> None:
+    """The bot is online"""
+
+    Logger.log(f"Bot is online and is logged in as {client.user}")
+    await client.change_presence(activity=Game("/snipe"))
+
+
+@client.event
+async def on_message_delete(message: Message):
+    """A message was deleted, so save it to the deleted message database"""
+
+    # TODO - check that message isn't an embed
+
+    # Check if author is a User
+    message_author: Union[str, User] = message.author
+    if type(message_author) == type(User()):
+        message_author = f"{message.author.name}#{message.author.discriminator}"
+
+    # Update deleted_messages
+    deleted_messages[message.channel.id]: dict = {
+        "author": message_author,
+        "message": message.content,
+        "creation_timestamp": message.creation_timestamp,
+    }
+
+
 ################
 ### Commands ###
 ################
 pass
+
 
 ###########
 ### Run ###
