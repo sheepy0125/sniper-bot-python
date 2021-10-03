@@ -23,17 +23,9 @@ try:
             CONFIG: dict = load(config_file)
 
             # Assertions (config is good)
-            assert (
-                "token" in CONFIG and "application_id" in CONFIG
-            ), 'Configuration must have "token" and "application_id" keys'
-
             assert (token_type := type(CONFIG["token"])) is type(
                 str()
             ), f'Config file: "token" must be a string (not "{token_type}")'
-
-            assert (application_id_type := type(CONFIG["application_id"])) is type(
-                str()
-            ), f'Config file: "application_id" must be a string (not "{application_id_type.__name__}")'
 
             assert (guild_ids_type := type(CONFIG["guild_ids"])) is type(
                 list()

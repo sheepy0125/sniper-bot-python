@@ -1,6 +1,5 @@
 {
-	"token": "",
-	"application_id": "",
-	"guild_ids": [],
-	"embed_color": "FFFFFF"
+    "token": "",
+    "guild_ids": [],
+    "embed_color": "FFFFFF"
 }
