@@ -54,9 +54,17 @@ client: commands.Bot = commands.Bot(
 client.remove_command("help")
 slash: SlashCommand = SlashCommand(client, sync_commands=True)
 
-deleted_messages: dict = {}
-# Stores a single deleted message for every channel ID
-# Example: {"123456": "Deleted message in #general", "654321": "Deleted message in #off-topic"}
+
+class MessageDatabases:
+    """
+    Little databases for different types of message history
+    Every channel will have one message saved
+    """
+
+    deleted_messages: dict = {}
+    edited_messages: dict = {}
+    removed_reactions: dict = {}
+
 
 #################
 ### Functions ###
@@ -87,10 +95,10 @@ async def on_message_delete(message: Message) -> None:
         message_author = f"{message.author.name}#{message.author.discriminator}"
 
     # Get created timestamp (datetime.datetime object) to Unix timestamp
-    creation_timestamp: int = mktime(message.created_at.timetuple())
+    creation_timestamp: int = int(mktime(message.created_at.timetuple()))
 
     # Update deleted_messages
-    deleted_messages[message.channel.id]: dict = {
+    MessageDatabases.deleted_messages[message.channel.id]: dict = {
         "author": message_author,
         "message": message.content,
         "creation_timestamp": creation_timestamp,
@@ -111,8 +119,8 @@ async def _snipe_command(ctx: SlashContext) -> None:
     Logger.log(f"Snipe slash command called in channel ID: {ctx.channel.id}")
 
     # There's a deleted message available
-    if ctx.channel.id in deleted_messages:
-        deleted_message: dict = deleted_messages[ctx.channel.id]
+    if ctx.channel.id in MessageDatabases.deleted_messages:
+        deleted_message: dict = MessageDatabases.deleted_messages[ctx.channel.id]
         await ctx.send(
             "Snipe snipe! \n"
             + f"Author: {deleted_message['author']}\n"
@@ -133,4 +141,15 @@ async def _snipe_command(ctx: SlashContext) -> None:
 ###########
 if __name__ == "__main__":
     Logger.log("Running bot!")
-    client.run(CONFIG["token"])
+    try:
+        client.run(CONFIG["token"])
+    except Exception as error:
+        Logger.log_error(error)
+        exit(1)
+
+    Logger.warn("Discord bot stopped")
+
+else:
+    Logger.warn("Discord bot isn't running by itself!")
+
+# Good night for now
