@@ -9,11 +9,12 @@ Created by sheepy0125, inspired by DankMemer
 #############
 # Import
 from tools import Logger
-from discord import Embed, Game, Message, User
+from discord import Embed, Game, Message, User, TextChannel
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from json import load
 from typing import Union
+from time import mktime
 
 # Parse configuration
 try:
@@ -75,28 +76,56 @@ async def on_ready() -> None:
 
 
 @client.event
-async def on_message_delete(message: Message):
+async def on_message_delete(message: Message) -> None:
     """A message was deleted, so save it to the deleted message database"""
 
     # TODO - check that message isn't an embed
 
     # Check if author is a User
     message_author: Union[str, User] = message.author
-    if type(message_author) == type(User()):
+    if type(message_author) is type(User):
         message_author = f"{message.author.name}#{message.author.discriminator}"
+
+    # Get created timestamp (datetime.datetime object) to Unix timestamp
+    creation_timestamp: int = mktime(message.created_at.timetuple())
 
     # Update deleted_messages
     deleted_messages[message.channel.id]: dict = {
         "author": message_author,
         "message": message.content,
-        "creation_timestamp": message.creation_timestamp,
+        "creation_timestamp": creation_timestamp,
     }
+
+    Logger.log(
+        "A message being deleted has been intercepted! Here's some info:\n"
+        + f"Author: {message_author}\nMessage: {message.content}\n"
+        + f"Creation timestamp: {creation_timestamp}"
+    )
 
 
 ################
 ### Commands ###
 ################
-pass
+@slash.slash(name="snipe")
+async def _snipe_command(ctx: SlashContext) -> None:
+    Logger.log(f"Snipe slash command called in channel ID: {ctx.channel.id}")
+
+    # There's a deleted message available
+    if ctx.channel.id in deleted_messages:
+        deleted_message: dict = deleted_messages[ctx.channel.id]
+        await ctx.send(
+            "Snipe snipe! \n"
+            + f"Author: {deleted_message['author']}\n"
+            + f"Message: {deleted_message['message']}\n"
+            + f"Creation timestamp: <t:{deleted_message['creation_timestamp']}>"
+        )
+        return
+
+    # No deleted message is available
+    await ctx.send(
+        "I hate to say this but, sadly, there is no deleted "
+        + "message to snipe from this channel. Sorry!"
+    )
 
 
 ###########
@@ -104,3 +133,4 @@ pass
 ###########
 if __name__ == "__main__":
     Logger.log("Running bot!")
+    client.run(CONFIG["token"])
