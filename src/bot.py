@@ -37,7 +37,12 @@ try:
 
             assert (guild_ids_type := type(CONFIG["guild_ids"])) is type(
                 list()
-            ), f'Config file: "guild_ids" must be a list of integers (not "{guild_ids_type.__name}")'
+            ), f'Config file: "guild_ids" must be a list of integers (not "{guild_ids_type.__name__}")'
+
+            CONFIG["embed_color"]: int = int(CONFIG["embed_color"], base=16)
+            assert (
+                CONFIG["embed_color"] <= 0xFFFFFF
+            ), "Embed color must be less than or equal to 0xffffff"
 
         except Exception as error:
             Logger.log_error(error)
@@ -112,7 +117,7 @@ async def on_message_delete(message: Message) -> None:
     # Note for this commit removing the datetime.datetime -> Unix timestamp:
     # discord.Embed.timestamp takes a datetime.datetime object, not Unix timestamp
     creation_timestamp: datetime = message.created_at
-Deletion snipes - 
+
     # Get attachment (if there is one)
     attachment: Union[str, None] = (
         message.attachments[0].url if len(message.attachments) != 0 else None
@@ -148,21 +153,23 @@ Deletion snipes -
 async def _snipe_deleted_message_command(ctx: SlashContext) -> None:
     """Snipe a deleted message"""
 
-    Logger.log(f"Snipe slash command called in channel ID: {ctx.channel.id}")
+    Logger.log(f"Snipe slash command called in channel ID {ctx.channel.id}")
     # There's a deleted message available
     if ctx.channel.id in MessageDatabases.deleted_messages:
         deleted_message: dict = MessageDatabases.deleted_messages[ctx.channel.id]
         sniped_embed: Embed = Embed(
-            title="Snipe snipe!",
             description=deleted_message["message"],
             timestamp=deleted_message["creation_timestamp"],
+            color=CONFIG["embed_color"],
         )
         sniped_embed.set_author(name=deleted_message["author"])
         sniped_embed.set_footer(text=f"posted in #{ctx.channel.name}")
         if attachment_url := deleted_message["attachment"]:
             # Use markdown for a link if the attachment isn't an image (isn't supported in embed)
             if is_image(attachment_url):
-                sniped_embed.description += f"{WHITESPACE_CHAR}[Attachment]({attachment_url})"
+                sniped_embed.description += (
+                    f"{NEW_LINE_CHAR}[Attachment]({attachment_url})"
+                )
 
             else:
                 sniped_embed.set_image(url=attachment_url)
