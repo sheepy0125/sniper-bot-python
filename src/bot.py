@@ -8,7 +8,7 @@ Created by sheepy0125, inspired by DankMemer
 ### Setup ###
 #############
 # Import
-from tools import Logger
+from utils.tools import Logger
 from discord import Embed, Game, Message, User, Intents, Embed
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
