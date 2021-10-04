@@ -1,10 +1,8 @@
-<img width="96" height="96" align="left" style="float: left; margin: 10px 10px 0 0;" alt="Icon" src="images/mascot.png">
+<img width="128" height="128" align="left" style="float: left; margin: 10px 10px 0 0;" alt="Icon" src="images/mascot.png">
 
 # Sniper Discord Bot - Python Edition
-
-### Like [Dank Memer's sniper bot](https://github.com/DankMemer/sniper), but written in Python.
-
-### Because [Discord.py](https://pypi.org/project/discord.py/) > [Discord.js](https://discord.js.org/#/)
+Like [Dank Memer's sniper bot](https://github.com/DankMemer/sniper), but written in Python.<br/>
+Because [Discord.py](https://pypi.org/project/discord.py/) > [Discord.js](https://discord.js.org/#/)
 
 # Features
 
