@@ -95,6 +95,17 @@ async def on_ready() -> None:
 
 
 @client.event
+async def on_message(message: Message) -> None:
+    # Redirect "pls snipe"
+    if message.content.lower().startswith("pls snipe"):
+        await message.channel.send(
+            "I noticed that you've typed `pls snipe`. Try `/snipe` instead!"
+        )
+
+    await client.process_commands(message)
+
+
+@client.event
 async def on_message_delete(message: Message) -> None:
     """A message was deleted, so save it to the deleted message database"""
 
